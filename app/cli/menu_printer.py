@@ -10,8 +10,6 @@ _menus: Dict[int, str] = {
     constants.LOGIN_MENU: "----\nWelcome to Kiwi\n----\n1. Login\n0. Exit",
     constants.MAIN_MENU: "----\nMain Menu\n----\n1. Manage Users\n2. Manage portfolios\n3. Market place\n0. Logout",
     constants.MANAGE_USERS_MENU: "----\nManage Users\n----\n1. View users\n2. Add user\n3. Delete user\n0. Back to main menu"
-
-
 }
 
 
@@ -31,14 +29,17 @@ def login():
     #     if user.password == password:
     #         print_menu(constants.MAIN_MENU)
     #     else:
-    #         print_error("Login failed")
+    #         print_error("Error: Login failed")
     #         print_menu(constants.LOGIN_MENU)
-    if user and user.password == password:
-        print_menu(constants.MAIN_MENU)
-    else:
-        print_error("Login failed")
-        print_menu(constants.LOGIN_MENU)
+    if not user or user.password != password:
+        raise Exception("Error: Login failed")
 
+    
+#purpose: to define the functions that needs to be executed depending on the user selection
+# user selection depends on the menu
+_router: Dict[str, MenuFunctions] = {
+    "0.1": MenuFunctions(executor = login, navigator = lambda: constants.MAIN_MENU)
+}
 
 def print_error(error: str):
     _console.print(error, style = "red")
@@ -56,6 +57,8 @@ def handle_user_selection(menu_id: int, user_selection: int):
     try:
         if menu_functions.executor:
             menu_functions.executor()
+        if menu_functions.navigator:
+            print_menu(menu_functions.navigator())
     except Exception as e:
         print_error(str(e))
         print_menu(menu_id)
@@ -67,11 +70,8 @@ def print_menu(menu_id: int):
     user_selection = int(_console.input(">>"))
     handle_user_selection(menu_id, user_selection)
 
-#purpose: to define the functions that needs to be executed depending on the user selection
-# user selection depends on the menu
-_router: Dict[str, MenuFunctions] = {
-    "0.1": MenuFunctions(executor = login)
-}
+
+
 
 
 

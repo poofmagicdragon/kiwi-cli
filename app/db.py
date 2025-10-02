@@ -2,7 +2,7 @@ from domain.User import User
 from typing import Dict
 
 _users: Dict[str, User] = {
-    "admin": User("admin", "admin", "admin", "admin", 0.0)
+    "admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 0.0)
 }
 
 def query_user(username:str) -> User|None:
