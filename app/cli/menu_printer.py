@@ -88,7 +88,7 @@ _router: Dict[str, MenuFunctions] = {
     "1.1": MenuFunctions(navigator = navigate_to_manage_user_menu),
     "2.1": MenuFunctions(executor = get_all_users, printer = print_all_users, navigator = lambda: constants.MANAGE_USERS_MENU),
     "2.2": MenuFunctions(executor = create_user, printer = lambda x: _console.print(f'\n{x}')), # add user
-    "2.3": MenuFunctions(executor = delete_user, printer = lambda x: _console.print(f'\n{x}'))
+    "2.3": MenuFunctions(executor = delete_user, printer = lambda x: _console.print(f'\n{x}')) 
 }
 
 #1. 
@@ -111,7 +111,14 @@ def handle_user_selection(menu_id: int, user_selection: int):
         else:
             print_menu(constants.MAIN_MENU)
     formatted_user_input = f"{str(menu_id)}.{str(user_selection)}"
-    menu_functions = _router[formatted_user_input]
+    menu_functions = _router.get(formatted_user_input)
+
+    # When a user inputs a selection that isn't on the menu, show them this text and keep them on the same page
+    if not menu_functions:
+        print_error(f"Unsupported Selection: {user_selection} is not a valid option")
+        print_menu(menu_id)
+        
+
     try:
         if menu_functions.executor:
             result = menu_functions.executor()
