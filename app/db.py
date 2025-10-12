@@ -2,6 +2,7 @@ from domain.User import User
 from typing import Dict, List
 from domain.security import Security
 from domain.Portfolio import Portfolio
+from domain.Order import PurchaseOrder, SellOrder
 
 
 class UniqueConstraintError(Exception):
@@ -11,16 +12,28 @@ class UniqueConstraintError(Exception):
 _portfolio_id: int = 0 
 
 _users: Dict[str, User] = {
-    "admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 0.0)
+    "admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 1000.0)
 }
 
 _securities:Dict[str, Security] = {
     "AAPL": Security("AAPL", "AAPL INC.", 100.00),
     "FB": Security("FB", "FaceBook", 112.00),
-    "MFST": Security("MFST", "Microsoft Corp.", 80.00)
+    "MSFT": Security("MSFT", "Microsoft Corp.", 80.00)
 }
 
 _portfolios: Dict[int, Portfolio] = {
+
+}
+
+_purchase_order_id: int = 0
+
+_purchaseorders: Dict[int, PurchaseOrder] = {
+
+}
+
+_sell_order_id: int = 0
+
+_sellorders: Dict[int, SellOrder] = {
 
 }
 
@@ -79,10 +92,40 @@ def get_all_portfolio_logged_in_user() -> List[Portfolio]:
 
 def create_new_portfolio(portfolio: Portfolio):
     global _portfolio_id
-    _portfolio_id += 1
     portfolio.id = _portfolio_id
     _portfolios[_portfolio_id] = portfolio
+    _portfolio_id += 1
 
 def increment_portfolio_id():
     global _portfolio_id
     _portfolio_id = _portfolio_id + 1
+
+
+def create_new_purchase_order(order: PurchaseOrder):
+    global _purchase_order_id
+    order.id = _purchase_order_id
+    _purchaseorders[_purchase_order_id] = order
+    _purchase_order_id += 1
+
+
+def get_price_by_ticker(ticker: str):
+    security = _securities.get(ticker)
+    if security:
+        return security.price
+    return None
+
+def update_user_balance(user: User, new_balance: float):
+    user.balance = new_balance
+    _users[user.username] = user
+
+def get_portfolio_by_id(portfolio_id: int) -> Portfolio|None:
+    return _portfolios.get(portfolio_id)
+
+def get_security_by_ticker(ticker: str) -> Security|None:
+    return _securities.get(ticker)
+
+def create_new_sell_order(order: SellOrder):
+    global _sell_order_id
+    order.id = _sell_order_id
+    _sellorders[_sell_order_id] = order
+    _sell_order_id += 1

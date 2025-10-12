@@ -16,7 +16,7 @@ def print_all_users(users: List[User]):
     table.add_column("Username", justify="center", style="cyan", no_wrap=True)
     table.add_column("First Name", justify="left", style="magenta")
     table.add_column("Last Name", justify="left", style="magenta")
-    table.add_column("Balance", justify="right", style="yellow")
+    table.add_column("Balance", justify="right", style="green")
     for user in users:
         table.add_row(str(user.username), user.firstname, user.lastname, str(user.balance))
     _console.print(table)

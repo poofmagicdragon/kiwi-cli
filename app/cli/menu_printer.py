@@ -9,7 +9,7 @@ from service.login_service import login
 from service.user_service import get_all_users, print_all_users, create_user, delete_user
 from service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios
 from service.security_service import get_all_securities, print_all_securities
-
+from service.order_service import create_purchase_order, create_sell_order
 
 _console = Console()
 
@@ -23,8 +23,8 @@ _menus: Dict[int, str] = {
     constants.LOGIN_MENU: "----\nWelcome to Kiwi\n----\n1. Login\n0. Exit",
     constants.MAIN_MENU: "----\nMain Menu\n----\n1. Manage Users\n2. Manage portfolios\n3. Market place\n0. Logout",
     constants.MANAGE_USERS_MENU: "----\nManage Users\n----\n1. View users\n2. Add user\n3. Delete user\n0. Back to main menu",
-    constants.MANAGE_PORTFOLIO: "----\nPortfolio Menu\n----\n1. View portfolio\n2. Create portfolio\n0. Back to main menu",
-    constants.MARKET_PLACE: "----\nMarketplace\n----\n1. View securities\n2. Place purchase order\n0. Back to main menu"
+    constants.MANAGE_PORTFOLIO: "----\nPortfolio Menu\n----\n1. View portfolio\n2. Create portfolio\n3. Sell Investment\n0. Back to main menu",
+    constants.MARKET_PLACE: "----\nMarketplace\n----\n1. View securities\n2. Place purchase order\n3. View Purchase Orders\n0. Back to main menu"
 }
 
 # for purchase order
@@ -86,7 +86,9 @@ _router: Dict[str, MenuFunctions] = {
     "1.3": MenuFunctions(navigator = lambda: constants.MARKET_PLACE),
     "4.1": MenuFunctions(executor= get_all_securities, printer = print_all_securities),
     "3.1": MenuFunctions(executor = get_all_portfolios, printer = print_all_portfolios),
-    "3.2": MenuFunctions(executor = create_portfolio, printer = lambda x: _console.print(f'\n{x}'))
+    "3.2": MenuFunctions(executor = create_portfolio, printer = lambda x: _console.print(f'\n{x}')),
+    "4.2": MenuFunctions(executor = create_purchase_order, printer = lambda x: _console.print(f'\n{x}')),
+    "3.3": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}'))
 }
 
 #1. 
@@ -104,7 +106,7 @@ def handle_user_selection(menu_id: int, user_selection: int):
         if menu_id == constants.LOGIN_MENU:
             sys.exit(0) # terminate application
         if menu_id == constants.MAIN_MENU:
-            db.reset_logged_in_user
+            db.reset_logged_in_user()
             print_menu(constants.LOGIN_MENU)
         else:
             print_menu(constants.MAIN_MENU)
@@ -120,7 +122,7 @@ def handle_user_selection(menu_id: int, user_selection: int):
     try:
         if menu_functions.executor:
             result = menu_functions.executor()
-            if result and menu_functions.printer:
+            if menu_functions.printer:
                 menu_functions.printer(result)
         if menu_functions.navigator:
             print_menu(menu_functions.navigator())

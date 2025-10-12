@@ -1,3 +1,4 @@
+#from app.domain import security
 from domain.User import User
 from domain.security import Security
 
@@ -8,11 +9,14 @@ class Portfolio():
         self.description = description
         self.investment_strategy = investment_strategy
         self.user = user
+        self.holdings = {}
 
-def add_security(self, security: Security, quantity: int):
-    if self.holdings:
-        if self.holdings[security.ticker]:
-            self.holdings[security.ticker] += quantity 
-    else:
-        self.holdings = [security]
+    def add_security(self, security: Security, quantity: int):
+        if security.ticker in self.holdings:
+            self.holdings[security.ticker] += quantity
+        else:
+            self.holdings[security.ticker] = quantity
     
+    def remove_security(self, security: Security, quantity: int):
+        if security.ticker in self.holdings and self.holdings[security.ticker] >= quantity:
+            self.holdings[security.ticker] -= quantity

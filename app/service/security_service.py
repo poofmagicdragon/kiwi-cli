@@ -17,3 +17,6 @@ def print_all_securities(securities: List[Security]):
     for security in securities:
         table.add_row(security.ticker, security.issuer, str(security.price))
     _console.print(table)
+
+
+    # If person does not have a portfolio, prompt them to create one first
