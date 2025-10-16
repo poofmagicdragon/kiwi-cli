@@ -7,9 +7,9 @@ import sys
 from rich.table import Table
 from service.login_service import login
 from service.user_service import get_all_users, print_all_users, create_user, delete_user
-from service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios
+from service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios, delete_portfolio
 from service.security_service import get_all_securities, print_all_securities
-from service.order_service import create_purchase_order, create_sell_order
+from service.order_service import create_purchase_order, create_sell_order, print_all_purchase_orders, get_all_purchase_orders
 
 _console = Console()
 
@@ -23,7 +23,7 @@ _menus: Dict[int, str] = {
     constants.LOGIN_MENU: "----\nWelcome to Kiwi\n----\n1. Login\n0. Exit",
     constants.MAIN_MENU: "----\nMain Menu\n----\n1. Manage Users\n2. Manage portfolios\n3. Market place\n0. Logout",
     constants.MANAGE_USERS_MENU: "----\nManage Users\n----\n1. View users\n2. Add user\n3. Delete user\n0. Back to main menu",
-    constants.MANAGE_PORTFOLIO: "----\nPortfolio Menu\n----\n1. View portfolio\n2. Create portfolio\n3. Sell Investment\n0. Back to main menu",
+    constants.MANAGE_PORTFOLIO: "----\nPortfolio Menu\n----\n1. View portfolio\n2. Create portfolio\n3. Delete Portfolio\n4. Harvest Investment\n0. Back to main menu",
     constants.MARKET_PLACE: "----\nMarketplace\n----\n1. View securities\n2. Place purchase order\n3. View Purchase Orders\n0. Back to main menu"
 }
 
@@ -88,7 +88,9 @@ _router: Dict[str, MenuFunctions] = {
     "3.1": MenuFunctions(executor = get_all_portfolios, printer = print_all_portfolios),
     "3.2": MenuFunctions(executor = create_portfolio, printer = lambda x: _console.print(f'\n{x}')),
     "4.2": MenuFunctions(executor = create_purchase_order, printer = lambda x: _console.print(f'\n{x}')),
-    "3.3": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}'))
+    "3.3": MenuFunctions(executor = delete_portfolio, printer = lambda x: _console.print(f'\n{x}')),
+    "3.4": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}')),
+    "4.3": MenuFunctions(executor = get_all_purchase_orders, printer = print_all_purchase_orders)
 }
 
 #1. 

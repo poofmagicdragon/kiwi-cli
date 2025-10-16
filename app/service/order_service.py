@@ -2,7 +2,9 @@ from domain.Order import PurchaseOrder, SellOrder
 import db
 from rich.console import Console
 from domain.Portfolio import Portfolio
-
+from service.portfolio_service import check_if_portfolio_has_stock
+from rich.table import Table
+from typing import List
 
 _console = Console()
 
@@ -17,6 +19,8 @@ def check_user_enough_balance(ticker: str, quantity: int) -> bool:
 
 def create_purchase_order():
     portfolio_id = _console.input("Portfolio ID: ")
+    if portfolio_id not in [str(p.id) for p in db.get_all_portfolio_logged_in_user()]:
+        return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
     ticker = _console.input("Ticker: ")
     quantity = _console.input("Quantity: ")
     quantity = int(quantity)
@@ -42,7 +46,15 @@ def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantit
 
 def create_sell_order():
     portfolio_id = _console.input("Portfolio ID: ")
+    if portfolio_id not in [str(p.id) for p in db.get_all_portfolio_logged_in_user()]:
+        return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+    try:
+        portfolio_id = int(portfolio_id)
+    except ValueError:
+        return _console.print(f"Invalid input: '{portfolio_id}' is not a number")
     ticker = _console.input("Ticker: ")
+    if not check_if_portfolio_has_stock(db.get_portfolio_by_id(portfolio_id), ticker):
+        return _console.print(f"Portfolio {portfolio_id} does not have any shares of {ticker}")
     quantity = _console.input("Quantity: ")
     quantity = int(quantity)
     user = db.get_logged_in_user()
@@ -61,6 +73,17 @@ def create_sell_order():
     portfolio.remove_security(security, quantity)
     return f"Created and executed new sell order for {quantity} shares of {ticker} in portfolio {portfolio_id} for ${sell_price}"
 
+def get_all_purchase_orders() -> List[PurchaseOrder]:
+    return db.get_all_purchase_orders()
 
-
-
+def print_all_purchase_orders(purchase_orders: List[PurchaseOrder]):    
+    if not purchase_orders:
+        return _console.print("No purchase orders found.", style="red")
+    table = Table(title = "Purchase Orders")
+    table.add_column("Order ID", style = "bold cyan")
+    table.add_column("Portfolio ID", style = "bold cyan")
+    table.add_column("Ticker", style = "bold cyan")
+    table.add_column("Quantity", style = "bold cyan")
+    for order in purchase_orders:
+        table.add_row(str(order.id), str(order.portfolio_id), order.ticker, str(order.quantity))
+    return _console.print(table)

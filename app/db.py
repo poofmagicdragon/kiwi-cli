@@ -100,6 +100,8 @@ def increment_portfolio_id():
     global _portfolio_id
     _portfolio_id = _portfolio_id + 1
 
+def delete_portfolio(portfolio: Portfolio):
+    _portfolios.pop(portfolio.id, None)
 
 def create_new_purchase_order(order: PurchaseOrder):
     global _purchase_order_id
@@ -129,3 +131,6 @@ def create_new_sell_order(order: SellOrder):
     order.id = _sell_order_id
     _sellorders[_sell_order_id] = order
     _sell_order_id += 1
+
+def get_all_purchase_orders() -> List[PurchaseOrder]:
+    return list(_purchaseorders.values())

@@ -1,4 +1,5 @@
 from rich.console import Console
+#from app.domain.Order import PurchaseOrder
 import db
 from domain.Portfolio import Portfolio
 from rich.table import Table
@@ -48,4 +49,23 @@ def print_all_portfolios(portfolios: List[Portfolio]):
     _console.print(table)
 
 
+def delete_portfolio():
+    portfolio_id = _console.input("Portfolio ID to delete: ")
 
+    # Check if input is a valid integer
+    try:
+        portfolio_id_int = int(portfolio_id)
+    except ValueError:
+        return f"Invalid input: '{portfolio_id}' is not a numeric portfolio ID."
+
+    portfolio = db.get_portfolio_by_id(portfolio_id_int)
+    if not portfolio:
+        return f"Portfolio with ID {portfolio_id_int} does not exist."
+
+    db.delete_portfolio(portfolio)
+    return f"Deleted portfolio with ID {portfolio_id_int}"
+
+def check_if_portfolio_has_stock(portfolio: Portfolio, ticker: str) -> bool:
+    if ticker in portfolio.holdings and portfolio.holdings[ticker] > 0:
+        return True
+    return False
