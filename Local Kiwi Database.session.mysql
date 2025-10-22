@@ -1,0 +1,36 @@
+-- CREATE TABLE `user`(
+--     username VARCHAR(30) NOT NULL PRIMARY KEY,
+--     firstname VARCHAR(30) NOT NULL,
+--     lastname VARCHAR(30) NOT NULL,
+--     password VARCHAR(30) NOT NULL,
+--     balance FLOAT NOT NULL
+-- );
+
+-- create table portfolio(
+--     id int auto_increment PRIMARY KEY,
+--     owner VARCHAR(30) NOT NULL,
+--     name VARCHAR(30) NOT NULL,
+--     description VARCHAR(500) NOT NULL,
+--     FOREIGN KEY (owner) REFERENCES user(username)
+-- );
+
+-- create table security(
+--     ticker VARCHAR(10) NOT NULL PRIMARY KEY,
+--     issuer VARCHAR(100) NOT NULL
+-- );
+
+-- create table investment(
+--     id int auto_increment PRIMARY KEY,
+--     portfolio_id int NOT NULL,
+--     ticker VARCHAR(30) NOT NULL,
+--     quantity int NOT NULL,
+--     FOREIGN KEY (portfolio_id) REFERENCES portfolio(id),
+--     FOREIGN KEY (ticker) REFERENCES security(ticker)
+-- );
+
+
+-- insert into `user` values('admin', 'admin', 'admin', 'admin', 0.0);
+-- insert into `user` values('mt', 'Michael', 'Tsang', 'password', 1000.0);
+
+SELECT * FROM user;
+

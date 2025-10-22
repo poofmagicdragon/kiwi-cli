@@ -12,7 +12,7 @@ class UniqueConstraintError(Exception):
 _portfolio_id: int = 0 
 
 _users: Dict[str, User] = {
-    "admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 1000.0)
+    #"admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 1000.0)
 }
 
 _securities:Dict[str, Security] = {
