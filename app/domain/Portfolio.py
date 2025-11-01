@@ -1,22 +1,23 @@
 #from app.domain import security
-from domain.User import User
-from domain.security import Security
+from typing import List
+#from domain.User import User
+from domain import User
 from database import Base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 class Portfolio(Base):
     __tablename__ = 'portfolio'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(30), nullable = False)
-    description = Column(String(500), nullable = True)
-    
-    investments = relationship("Investment", back_populates="portfolio")
+    id: Mapped[int] = mapped_column(name = "id", primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable = False)
+    description: Mapped[str] = mapped_column(String(255), nullable = False)
+    owner: Mapped[int] = mapped_column(String(30), ForeignKey("user.username"), nullable = False)
+
+    user: Mapped["User"] = relationship("User", back_populates="portfolios")
+    investments: Mapped[List["Investment"]] = relationship("Investment", back_populates = "portfolio")
 
     def __str__(self):
-        user_str = getattr(self, 'user', None)
-        username = user_str.username if user_str else "N/A"
-        return f"<Portfolio(name={self.name}, description={self.description}, user={username})>"
+        return f"<Portfolio(name={self.name}, description={self.description}, user={self.user})>"
 
     # def __init__(self, name:str, description: str, investment_strategy: str, user: User):
     #     self.id = None

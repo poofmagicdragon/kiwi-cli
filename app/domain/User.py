@@ -1,13 +1,18 @@
+from typing import List
+from domain import Portfolio
 from database import Base
 from sqlalchemy import Column, String, Float
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 class User(Base):
-    __tablename__ = 'USER'
-    username = Column(String(30), primary_key=True)
-    password = Column(String(30), nullable=False)
-    firstname = Column(String(30), nullable=False)
-    lastname = Column(String(30), nullable=False)
-    balance = Column(Float, nullable=False)
+    __tablename__ = 'user'
+    username: Mapped[str] = mapped_column(String(30), primary_key = True)
+    password: Mapped[str] = mapped_column(String(100), nullable = False)
+    firstname: Mapped[str] = mapped_column(String(50), nullable = False)
+    lastname: Mapped[str] = mapped_column(String(50), nullable = False)
+    balance: Mapped[float] = mapped_column(Float, nullable = False)
+    
+    portfolios: Mapped[List["Portfolio"]] = relationship("Portfolio", back_populates="user")
 
     # def __init__(self, username: str, password: str, firstname: str, lastname: str, balance: float):
     #     self.username = username

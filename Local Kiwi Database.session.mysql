@@ -17,7 +17,11 @@
 -- create table security(
 --     ticker VARCHAR(10) NOT NULL PRIMARY KEY,
 --     issuer VARCHAR(100) NOT NULL
+--     price FLOAT NOT NULL
 -- );
+
+-- ALTER TABLE security
+-- ADD COLUMN price FLOAT NOT NULL;
 
 -- create table investment(
 --     id int auto_increment PRIMARY KEY,
@@ -33,4 +37,5 @@
 -- insert into `user` values('mt', 'Michael', 'Tsang', 'password', 1000.0);
 
 SELECT * FROM user;
+
 
