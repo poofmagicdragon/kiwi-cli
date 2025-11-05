@@ -1,8 +1,22 @@
-markdown-it-py == 4.0.0
-mdurl == 0.1.2
-pygments == 2.19.2
-PyMySQL == 1.1.2
-rich == 14.1.0
-SQLAlchemy == 2.0.44
-typing_extensions == 4.15.0
-cryptography == 41.0.3
+cffi==2.0.0
+cryptography==41.0.3
+greenlet==3.2.4
+iniconfig==2.3.0
+markdown-it-py==4.0.0
+mdurl==0.1.2
+numpy==2.3.3
+packaging==25.0
+pandas==2.3.2
+pluggy==1.6.0
+pycparser==2.23
+Pygments==2.19.2
+PyMySQL==1.1.2
+pytest==8.4.2
+pytest-cov==4.1.0
+python-dateutil==2.9.0.post0
+pytz==2025.2
+rich==14.1.0
+six==1.17.0
+SQLAlchemy==2.0.44
+typing_extensions==4.15.0
+tzdata==2025.2

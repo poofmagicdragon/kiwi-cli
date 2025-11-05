@@ -1,7 +1,7 @@
 from typing import Tuple
 from rich.console import Console
-from database import get_session
-from domain.User import User
+from app.database import get_session
+from app.domain.User import User
 
 _console = Console()
 

@@ -3,7 +3,7 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from config import database_config
+from app.config import database_config
 
 class Base(DeclarativeBase): pass
 
@@ -18,3 +18,5 @@ LocalSession = sessionmaker(bind=engine)
 
 def get_session():
     return LocalSession()
+
+

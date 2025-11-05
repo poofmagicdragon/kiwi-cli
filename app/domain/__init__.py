@@ -1,7 +1,7 @@
-from .User import User
-from .Portfolio import Portfolio
-from .security import Security
-from .Investment import Investment
+from app.domain.User import User
+from app.domain.Portfolio import Portfolio
+from app.domain.security import Security
+from app.domain.Investment import Investment
 
 # __all__ = [
 #     "User",

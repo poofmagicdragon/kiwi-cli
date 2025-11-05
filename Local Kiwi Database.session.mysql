@@ -11,8 +11,11 @@
 --     owner VARCHAR(30) NOT NULL,
 --     name VARCHAR(30) NOT NULL,
 --     description VARCHAR(500) NOT NULL,
+--     investment_strategy VARCHAR(500) NOT NULL,
 --     FOREIGN KEY (owner) REFERENCES user(username)
 -- );
+
+-- ALTER TABLE portfolio ADD COLUMN investment_strategy VARCHAR(500) NOT NULL;
 
 -- create table security(
 --     ticker VARCHAR(10) NOT NULL PRIMARY KEY,
@@ -36,6 +39,6 @@
 -- insert into `user` values('admin', 'admin', 'admin', 'admin', 0.0);
 -- insert into `user` values('mt', 'Michael', 'Tsang', 'password', 1000.0);
 
-SELECT * FROM user;
+-- SELECT * FROM user;
 
 

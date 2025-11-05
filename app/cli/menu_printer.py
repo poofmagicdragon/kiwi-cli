@@ -1,23 +1,21 @@
 from typing import Dict, Tuple, List
 from rich.console import Console
-from cli import constants
-from domain.MenuFunctions import MenuFunctions
-import db
+from app.cli import constants
+from app.domain.MenuFunctions import MenuFunctions
 import sys
 from rich.table import Table
-from service.login_service import login
-from service.user_service import get_all_users, print_all_users, create_user, delete_user
-from service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios, delete_portfolio
-from service.security_service import get_all_securities, print_all_securities
-from service.order_service import create_purchase_order, create_sell_order, print_all_purchase_orders, get_all_purchase_orders
+from app.service.login_service import login
+from app.service.user_service import get_all_users, print_all_users, create_user, delete_user, get_logged_in_user, reset_logged_in_user
+from app.service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios, delete_portfolio
+from app.service.security_service import get_all_securities, print_all_securities
+#from app.service.investment_service import create_purchase_order, create_sell_order, print_all_purchase_orders, get_all_purchase_orders
+
 
 _console = Console()
 
 class UnsupportedMenuError(Exception):
     def __init__ (self, message:str):
         super().__init__(message)
-
-
 
 _menus: Dict[int, str] = {
     constants.LOGIN_MENU: "----\nWelcome to Kiwi\n----\n1. Login\n0. Exit",
@@ -58,21 +56,11 @@ _menus: Dict[int, str] = {
 # Portfolio: [id: 1, name: "2025 Tech", ..., holdings = {AAPL: 5}]
 # User: [username: "mt", ... balance = 600]
 
-
-
-
-
 def navigate_to_manage_user_menu() -> int:
-    logged_in_user = db.get_logged_in_user()
+    logged_in_user = get_logged_in_user()
     if logged_in_user and logged_in_user.username != "admin":
         raise UnsupportedMenuError("Only admin user can manage users")
     return constants.MANAGE_USERS_MENU
-
-
-
-
-
-
 
 #purpose: to define the functions that needs to be executed depending on the user selection
 # user selection depends on the menu
@@ -87,15 +75,13 @@ _router: Dict[str, MenuFunctions] = {
     "4.1": MenuFunctions(executor= get_all_securities, printer = print_all_securities),
     "3.1": MenuFunctions(executor = get_all_portfolios, printer = print_all_portfolios),
     "3.2": MenuFunctions(executor = create_portfolio, printer = lambda x: _console.print(f'\n{x}')),
-    "4.2": MenuFunctions(executor = create_purchase_order, printer = lambda x: _console.print(f'\n{x}')),
+    #"4.2": MenuFunctions(executor = create_purchase_order, printer = lambda x: _console.print(f'\n{x}')),
     "3.3": MenuFunctions(executor = delete_portfolio, printer = lambda x: _console.print(f'\n{x}')),
-    "3.4": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}')),
-    "4.3": MenuFunctions(executor = get_all_purchase_orders, printer = print_all_purchase_orders)
+    #"3.4": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}')),
+    #"4.3": MenuFunctions(executor = get_all_purchase_orders, printer = print_all_purchase_orders)
 }
 
-#1. 
-#2. 
-#3. 
+
 
 
 
@@ -108,7 +94,7 @@ def handle_user_selection(menu_id: int, user_selection: int):
         if menu_id == constants.LOGIN_MENU:
             sys.exit(0) # terminate application
         if menu_id == constants.MAIN_MENU:
-            db.reset_logged_in_user()
+            reset_logged_in_user()
             print_menu(constants.LOGIN_MENU)
         else:
             print_menu(constants.MAIN_MENU)

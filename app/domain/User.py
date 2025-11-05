@@ -1,6 +1,6 @@
 from typing import List
-from domain import Portfolio
-from database import Base
+from app.domain import Portfolio
+from app.database import Base
 from sqlalchemy import Column, String, Float
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 

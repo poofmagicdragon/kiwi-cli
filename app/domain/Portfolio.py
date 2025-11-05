@@ -1,8 +1,7 @@
 #from app.domain import security
 from typing import List
-#from domain.User import User
-from domain import User
-from database import Base
+from app.domain import User
+from app.database import Base
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
@@ -11,6 +10,7 @@ class Portfolio(Base):
     id: Mapped[int] = mapped_column(name = "id", primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable = False)
     description: Mapped[str] = mapped_column(String(255), nullable = False)
+    investment_strategy: Mapped[str] = mapped_column(String(255), nullable = False)
     owner: Mapped[int] = mapped_column(String(30), ForeignKey("user.username"), nullable = False)
 
     user: Mapped["User"] = relationship("User", back_populates="portfolios")

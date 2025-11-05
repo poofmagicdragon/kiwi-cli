@@ -1,41 +1,26 @@
-from domain.User import User
+from app.domain.User import User
 from typing import Dict, List
-from domain.security import Security
-from domain.Portfolio import Portfolio
-from domain.Order import PurchaseOrder, SellOrder
+from app.domain import Security
+from app.domain import Portfolio
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
+from app.config import database_config
 
+class Base(DeclarativeBase): pass
+
+def create_connection_string() -> str:
+    return f"mysql+pymysql://{database_config.get('user')}:{database_config.get('password')}@{database_config.get('host')}:{database_config.get('port')}/{database_config.get('database')}"
+
+
+
+# database url = connection string
+engine = create_engine(url=create_connection_string())
+LocalSession = sessionmaker(bind=engine)
 
 class UniqueConstraintError(Exception):
      def __init__(self, message: str):
          super().__init__(message)
 
-_portfolio_id: int = 0 
-
-_users: Dict[str, User] = {
-    #"admin": User("admin", "adminpass", "Admin Firstname", "Admin Lastname", 1000.0)
-}
-
-_securities:Dict[str, Security] = {
-    "AAPL": Security("AAPL", "AAPL INC.", 100.00),
-    "FB": Security("FB", "FaceBook", 112.00),
-    "MSFT": Security("MSFT", "Microsoft Corp.", 80.00)
-}
-
-_portfolios: Dict[int, Portfolio] = {
-
-}
-
-_purchase_order_id: int = 0
-
-_purchaseorders: Dict[int, PurchaseOrder] = {
-
-}
-
-_sell_order_id: int = 0
-
-_sellorders: Dict[int, SellOrder] = {
-
-}
 
 _logged_in_user: User|None = None
 
@@ -52,20 +37,15 @@ def reset_logged_in_user():
     global _logged_in_user 
     _logged_in_user = None
 
+def query_user(session: Session, name:str) -> User|None:
+    return session.query(User).filter(User.username == name).first()
 
-def query_user(username:str) -> User|None:
-    try:
-        return _users[username]
-    except KeyError as ke:
-        return None
+def query_all_users(session: Session) -> list[User]:
+    return session.query(User).all()
 
-def query_all_users() -> list[User]:
-    return list(_users.values())
+def create_new_user(session: Session, user: User):
 
-def create_new_user(user: User):
-    if user.username in _users:
-        raise UniqueConstraintError(f"User with username {user.username} already exists")
-    _users[user.username] = user
+
 
 def delete_user(username: str):
     if username not in _users:
