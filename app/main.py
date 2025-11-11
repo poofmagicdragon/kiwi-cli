@@ -5,17 +5,19 @@ from app.cli import constants
 
 print_menu(constants.LOGIN_MENU)
 
-from database import get_session
-from app.domain.User import User
 
-session = get_session()
-# Now that I have a session how do I query all users
-users = session.query(User).all()
 
-for user in users:
-    print(user)
+# from database import get_session
+# from app.domain.User import User
 
-session.close()
+# # session = get_session()
+# # # Now that I have a session how do I query all users
+# # users = session.query(User).all()
+
+# # for user in users:
+# #     print(user)
+
+# # session.close()
 
 # user = User(username = "mt1", firstname = "Michael", lastname = "Tsang", password = "password", balance = 1000.0)
 

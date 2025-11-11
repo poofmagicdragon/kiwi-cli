@@ -1,8 +1,10 @@
 from typing import List
-from app.domain import Portfolio
+# from app.domain import Portfolio
+# from app.domain import Transaction
 from app.database import Base
 from sqlalchemy import Column, String, Float
 from sqlalchemy.orm import relationship, mapped_column, Mapped
+
 
 class User(Base):
     __tablename__ = 'user'
@@ -13,6 +15,7 @@ class User(Base):
     balance: Mapped[float] = mapped_column(Float, nullable = False)
     
     portfolios: Mapped[List["Portfolio"]] = relationship("Portfolio", back_populates="user")
+    transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="user")
 
     # def __init__(self, username: str, password: str, firstname: str, lastname: str, balance: float):
     #     self.username = username

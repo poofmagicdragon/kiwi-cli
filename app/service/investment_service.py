@@ -1,77 +1,99 @@
+from unittest import result
 from rich.console import Console
+from sqlalchemy import func, text
 from app.domain.Portfolio import Portfolio
 #from service.portfolio_service import check_if_portfolio_has_stock
 from rich.table import Table
 from typing import List
 from app.domain.Investment import Investment
 from app.database import get_session
+from app.domain.security import Security
+from app.service.security_service import get_price_by_ticker
+from app.service.user_service import get_logged_in_user, update_user_balance
+from app.service.portfolio_service import get_all_portfolio_logged_in_user
+from sqlalchemy.orm import Session
+from app.domain import Transaction
 
 _console = Console()
 
+def check_user_enough_balance(ticker: str, quantity: int, session: Session) -> bool:
+    current_user = get_logged_in_user()
+    price = get_price_by_ticker(ticker, session)
+    if current_user.balance - (price * quantity) >= 0:
+        return True
+    return False
 
+def create_purchase_order(session: Session):
+    user = get_logged_in_user()
+    portfolio_id = _console.input("Portfolio ID: ")
+    portfolio_id = int(portfolio_id)
+    if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
+        return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+    ticker = _console.input("Ticker: ").upper()
+    quantity_to_buy = _console.input("Quantity: ")
+    quantity_to_buy = int(quantity_to_buy)
 
-# def check_user_enough_balance(ticker: str, quantity: int) -> bool:
-#     current_user = db.get_logged_in_user()
-#     price = db.get_price_by_ticker(ticker)
-#     if current_user.balance - (price * quantity) >= 0:
-#         return True
-#     return False
-
-# def create_purchase_order():
-#     portfolio_id = _console.input("Portfolio ID: ")
-#     if portfolio_id not in [str(p.id) for p in db.get_all_portfolio_logged_in_user()]:
-#         return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
-#     ticker = _console.input("Ticker: ")
-#     quantity = _console.input("Quantity: ")
-#     quantity = int(quantity)
-#     user = db.get_logged_in_user()
-#     portfolio = db.get_portfolio_by_id(int(portfolio_id))
-#     security = db.get_security_by_ticker(ticker)
-
-#     if not check_user_enough_balance(ticker, quantity):
-#         return _console.print("Insufficient balance to make purchase", style="bold red")
+    if not check_user_enough_balance(ticker, quantity_to_buy, session):
+        return _console.print("Insufficient balance to make purchase", style="bold red")
     
-#     purchase_order = PurchaseOrder(portfolio_id, ticker, quantity)
-#     db.create_new_purchase_order(purchase_order)
+    # This checks whether the pair of portfolio_id and ticker combination exist in database already
+    exists = session.query(Investment).filter_by(portfolio_id = portfolio_id, ticker = ticker).first()
+    if exists:
+        exists.quantity += quantity_to_buy
+    else:
+        new_investment = Investment(portfolio_id=portfolio_id, ticker=ticker, quantity=quantity_to_buy)
+        session.add(new_investment)
+    transaction = Transaction(user_id = user.username, portfolio_id = portfolio_id, security_id = ticker, trans_type = "BUY", quantity = quantity_to_buy, price = get_price_by_ticker(ticker, session))
+    session.add(transaction)
 
-#     new_balance = user.balance - (db.get_price_by_ticker(ticker) * quantity)
-#     db.update_user_balance(user, new_balance)
-#     portfolio.add_security(security, quantity)
-#     return f"Created new purchase order for {quantity} shares of {ticker} in portfolio {portfolio_id}"
+    new_balance = user.balance - (get_price_by_ticker(ticker, session) * quantity_to_buy)
+    update_user_balance(session, user.username, new_balance)
+    return f"Created new purchase order for {quantity_to_buy} shares of {ticker} in portfolio {portfolio_id}"
 
-# def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantity: int) -> bool:
-#     if ticker in portfolio.holdings and portfolio.holdings[ticker] >= quantity:
-#         return True
-#     return False
+def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantity: int) -> bool:
+    if ticker in portfolio.holdings and portfolio.holdings[ticker] >= quantity:
+        return True
+    return False
 
-# def create_sell_order():
-#     portfolio_id = _console.input("Portfolio ID: ")
-#     if portfolio_id not in [str(p.id) for p in db.get_all_portfolio_logged_in_user()]:
-#         return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
-#     try:
-#         portfolio_id = int(portfolio_id)
-#     except ValueError:
-#         return _console.print(f"Invalid input: '{portfolio_id}' is not a number")
-#     ticker = _console.input("Ticker: ")
-#     if not check_if_portfolio_has_stock(db.get_portfolio_by_id(portfolio_id), ticker):
-#         return _console.print(f"Portfolio {portfolio_id} does not have any shares of {ticker}")
-#     quantity = _console.input("Quantity: ")
-#     quantity = int(quantity)
-#     user = db.get_logged_in_user()
-#     portfolio = db.get_portfolio_by_id(int(portfolio_id))
-#     security = db.get_security_by_ticker(ticker)
-#     if not portfolio_has_sufficient_quantity(portfolio, ticker, quantity):
-#         return _console.print("Insufficient quantity to make sale", style="bold red")
-#     sell_price = _console.input("Sale Price: ")
-#     sell_price = float(sell_price)
-    
-#     sell_order = SellOrder(portfolio_id, ticker, quantity, sell_price)
-#     db.create_new_sell_order(sell_order)
+def harvest_investment(session: Session):
+    portfolio_id = _console.input("Portfolio ID: ")
+    portfolio_id = int(portfolio_id)
+    if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
+        _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+        return
+    try:
+        portfolio_id = int(portfolio_id)
+    except ValueError:
+        _console.print(f"Invalid input: '{portfolio_id}' is not a number")
+        return
+    ticker = _console.input("Ticker: ")
 
-#     new_balance = user.balance + (sell_price * quantity)
-#     db.update_user_balance(user, new_balance)
-#     portfolio.remove_security(security, quantity)
-#     return f"Created and executed new sell order for {quantity} shares of {ticker} in portfolio {portfolio_id} for ${sell_price}"
+    number_of_shares = session.query(func.sum(Investment.quantity)).filter_by(portfolio_id = portfolio_id, ticker = ticker).scalar()
+    number_of_shares = number_of_shares or 0
+
+    if number_of_shares == 0:
+        _console.print(f"Portfolio {portfolio_id} does not have any shares of {ticker}")
+        return
+    quantity_to_sell = _console.input("Quantity: ")
+    quantity_to_sell = int(quantity_to_sell)
+    user = get_logged_in_user()
+
+    if number_of_shares < quantity_to_sell:
+        _console.print("Insufficient quantity to make sale", style="bold red")
+        return
+    sell_price = _console.input("Sale Price: ")
+    sell_price = float(sell_price)
+
+    number_of_shares -= quantity_to_sell
+    investment = session.query(Investment).filter_by(portfolio_id = portfolio_id, ticker = ticker).first()
+    investment.quantity = number_of_shares
+
+    transaction = Transaction(user_id = user.username, portfolio_id = portfolio_id, security_id = ticker, trans_type = "SELL", quantity = quantity_to_sell, price = sell_price)
+    session.add(transaction)
+
+    new_balance = user.balance + (sell_price * quantity_to_sell)
+    update_user_balance(session, user.username, new_balance)
+    return f"Created and executed new sell order for {quantity_to_sell} shares of {ticker} in portfolio {portfolio_id} for ${sell_price}"
 
 # def get_all_purchase_orders() -> List[PurchaseOrder]:
 #     return db.get_all_purchase_orders()
@@ -110,3 +132,4 @@ def print_all_investments() -> None:
         _console.print(table)
     finally:
         session.close()
+

@@ -6,4 +6,5 @@ class MenuFunctions:
         self.executor = executor
         self.printer = printer
         self.navigator = navigator
+ 
         

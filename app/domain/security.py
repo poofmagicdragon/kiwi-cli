@@ -2,6 +2,7 @@ from app.database import Base
 from sqlalchemy import String, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
+# from app.domain import Investment, Transaction
 
 
 class Security(Base):
@@ -12,7 +13,7 @@ class Security(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False)
 
     investments: Mapped[List["Investment"]] = relationship("Investment", back_populates="security")
-
+    transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="security")
     # def __init__(self, ticker: str, issuer: str, price: float):
     #     self.ticker = ticker
     #     self.issuer = issuer

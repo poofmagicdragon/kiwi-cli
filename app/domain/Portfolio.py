@@ -1,6 +1,6 @@
 #from app.domain import security
 from typing import List
-from app.domain import User
+# from app.domain import Transaction, User, Investment
 from app.database import Base
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column, Mapped
@@ -15,9 +15,12 @@ class Portfolio(Base):
 
     user: Mapped["User"] = relationship("User", back_populates="portfolios")
     investments: Mapped[List["Investment"]] = relationship("Investment", back_populates = "portfolio")
-
+    transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="portfolio")
+    
     def __str__(self):
         return f"<Portfolio(name={self.name}, description={self.description}, user={self.user})>"
+
+    
 
     # def __init__(self, name:str, description: str, investment_strategy: str, user: User):
     #     self.id = None

@@ -4,10 +4,12 @@ from app.cli import constants
 from app.domain.MenuFunctions import MenuFunctions
 import sys
 from rich.table import Table
-from app.service.login_service import login
-from app.service.user_service import get_all_users, print_all_users, create_user, delete_user, get_logged_in_user, reset_logged_in_user
+from app.service.login_service import login, get_login_inputs
+from app.service.user_service import get_all_users, print_all_users, create_user, delete_user, get_logged_in_user, reset_logged_in_user, get_user_input, get_username_for_deletion
 from app.service.portfolio_service import create_portfolio, get_all_portfolios, print_all_portfolios, delete_portfolio
 from app.service.security_service import get_all_securities, print_all_securities
+from app.database import get_session
+from app.service.investment_service import create_purchase_order, harvest_investment
 #from app.service.investment_service import create_purchase_order, create_sell_order, print_all_purchase_orders, get_all_purchase_orders
 
 
@@ -65,24 +67,21 @@ def navigate_to_manage_user_menu() -> int:
 #purpose: to define the functions that needs to be executed depending on the user selection
 # user selection depends on the menu
 _router: Dict[str, MenuFunctions] = {
-    "0.1": MenuFunctions(executor = login, navigator = lambda: constants.MAIN_MENU),
+    "0.1": MenuFunctions(executor = lambda: login(*get_login_inputs(), get_session()), navigator = lambda: constants.MAIN_MENU),
     "1.1": MenuFunctions(navigator = navigate_to_manage_user_menu),
     "1.2": MenuFunctions(navigator = lambda: constants.MANAGE_PORTFOLIO),
-    "2.1": MenuFunctions(executor = get_all_users, printer = print_all_users, navigator = lambda: constants.MANAGE_USERS_MENU),
-    "2.2": MenuFunctions(executor = create_user, printer = lambda x: _console.print(f'\n{x}')), # add user
-    "2.3": MenuFunctions(executor = delete_user, printer = lambda x: _console.print(f'\n{x}')), 
+    "2.1": MenuFunctions(executor = lambda: get_all_users(get_session()), printer = print_all_users, navigator = lambda: constants.MANAGE_USERS_MENU),
+    "2.2": MenuFunctions(executor = lambda: create_user(get_session(), get_user_input()), printer = lambda x: _console.print(f'\n{x}')), # add user
+    "2.3": MenuFunctions(executor = lambda: delete_user(get_session(), get_username_for_deletion()), printer = lambda x: _console.print(f'\n{x}')), 
     "1.3": MenuFunctions(navigator = lambda: constants.MARKET_PLACE),
-    "4.1": MenuFunctions(executor= get_all_securities, printer = print_all_securities),
-    "3.1": MenuFunctions(executor = get_all_portfolios, printer = print_all_portfolios),
-    "3.2": MenuFunctions(executor = create_portfolio, printer = lambda x: _console.print(f'\n{x}')),
-    #"4.2": MenuFunctions(executor = create_purchase_order, printer = lambda x: _console.print(f'\n{x}')),
+    "4.1": MenuFunctions(executor= lambda: get_all_securities(get_session()), printer = print_all_securities),
+    "3.1": MenuFunctions(executor = lambda: get_all_portfolios(get_session()), printer = lambda x: print_all_portfolios(get_session())),
+    "3.2": MenuFunctions(executor = lambda: create_portfolio(get_session()), printer = lambda x: _console.print(f'\n{x}')),
+    "4.2": MenuFunctions(executor=lambda: create_purchase_order(get_session()), printer=lambda x: _console.print(f'\n{x}')),
     "3.3": MenuFunctions(executor = delete_portfolio, printer = lambda x: _console.print(f'\n{x}')),
-    #"3.4": MenuFunctions(executor = create_sell_order, printer = lambda x: _console.print(f'\n{x}')),
+    "3.4": MenuFunctions(executor = lambda: harvest_investment(get_session()), printer = lambda x: _console.print(f'\n{x}'))
     #"4.3": MenuFunctions(executor = get_all_purchase_orders, printer = print_all_purchase_orders)
 }
-
-
-
 
 
 def print_error(error: str):
