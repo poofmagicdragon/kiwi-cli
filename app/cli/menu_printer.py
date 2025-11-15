@@ -1,6 +1,7 @@
 from typing import Dict, Tuple, List
 from rich.console import Console
 from app.cli import constants
+from app.domain import User
 from app.domain.MenuFunctions import MenuFunctions
 import sys
 from rich.table import Table
@@ -24,7 +25,7 @@ _menus: Dict[int, str] = {
     constants.MAIN_MENU: "----\nMain Menu\n----\n1. Manage Users\n2. Manage portfolios\n3. Market place\n0. Logout",
     constants.MANAGE_USERS_MENU: "----\nManage Users\n----\n1. View users\n2. Add user\n3. Delete user\n0. Back to main menu",
     constants.MANAGE_PORTFOLIO: "----\nPortfolio Menu\n----\n1. View portfolio\n2. Create portfolio\n3. Delete Portfolio\n4. Harvest Investment\n0. Back to main menu",
-    constants.MARKET_PLACE: "----\nMarketplace\n----\n1. View securities\n2. Place purchase order\n3. View Purchase Orders\n0. Back to main menu"
+    constants.MARKET_PLACE: "----\nMarketplace\n----\n1. View securities\n2. Place purchase order\n3. View purchase orders\n0. Back to main menu"
 }
 
 # for purchase order
@@ -58,8 +59,7 @@ _menus: Dict[int, str] = {
 # Portfolio: [id: 1, name: "2025 Tech", ..., holdings = {AAPL: 5}]
 # User: [username: "mt", ... balance = 600]
 
-def navigate_to_manage_user_menu() -> int:
-    logged_in_user = get_logged_in_user()
+def navigate_to_manage_user_menu(logged_in_user: User) -> int:
     if logged_in_user and logged_in_user.username != "admin":
         raise UnsupportedMenuError("Only admin user can manage users")
     return constants.MANAGE_USERS_MENU
@@ -77,9 +77,9 @@ _router: Dict[str, MenuFunctions] = {
     "4.1": MenuFunctions(executor= lambda: get_all_securities(get_session()), printer = print_all_securities),
     "3.1": MenuFunctions(executor = lambda: get_all_portfolios(get_session()), printer = lambda x: print_all_portfolios(get_session())),
     "3.2": MenuFunctions(executor = lambda: create_portfolio(get_session()), printer = lambda x: _console.print(f'\n{x}')),
-    "4.2": MenuFunctions(executor=lambda: create_purchase_order(get_session()), printer=lambda x: _console.print(f'\n{x}')),
+    "4.2": MenuFunctions(executor=lambda: create_purchase_order(get_session(), get_logged_in_user()), printer=lambda x: _console.print(f'\n{x}')),
     "3.3": MenuFunctions(executor = delete_portfolio, printer = lambda x: _console.print(f'\n{x}')),
-    "3.4": MenuFunctions(executor = lambda: harvest_investment(get_session()), printer = lambda x: _console.print(f'\n{x}'))
+    "3.4": MenuFunctions(executor = lambda: harvest_investment(get_session(), get_logged_in_user()), printer = lambda x: _console.print(f'\n{x}'))
     #"4.3": MenuFunctions(executor = get_all_purchase_orders, printer = print_all_purchase_orders)
 }
 
@@ -112,7 +112,9 @@ def handle_user_selection(menu_id: int, user_selection: int):
             if menu_functions.printer:
                 menu_functions.printer(result)
         if menu_functions.navigator:
-            print_menu(menu_functions.navigator())
+            next_menu = menu_functions.navigator()
+            if next_menu is not None:
+                print_menu(next_menu)
         else:
             print_menu(menu_id)
     except Exception as e:

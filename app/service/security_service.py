@@ -28,7 +28,7 @@ def print_all_securities(securities: List[Security]):
 
 def get_price_by_ticker(ticker: str, session: Session) -> float:
     security = session.query(Security).filter_by(ticker=ticker).one_or_none()
-    if not security: #or security.price is None:
+    if not security: 
         raise ValueError(f"Missing price for ticker '{ticker}'")
     return security.price
 

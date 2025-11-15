@@ -103,3 +103,5 @@ def test_get_all_portfolio_logged_in_user(monkeypatch, db_session):
     assert len(portfolios) == 2
     assert portfolios[0].owner == "X"
     assert portfolios[1].owner == "X"
+
+

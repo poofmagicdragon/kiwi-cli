@@ -12,29 +12,29 @@ from app.service.security_service import get_price_by_ticker
 from app.service.user_service import get_logged_in_user, update_user_balance
 from app.service.portfolio_service import get_all_portfolio_logged_in_user
 from sqlalchemy.orm import Session
-from app.domain import Transaction
+from app.domain import Transaction, User
 
 _console = Console()
 
-def check_user_enough_balance(ticker: str, quantity: int, session: Session) -> bool:
-    current_user = get_logged_in_user()
+def check_user_enough_balance(ticker: str, quantity: int, session: Session, current_user: User) -> bool:
     price = get_price_by_ticker(ticker, session)
     if current_user.balance - (price * quantity) >= 0:
         return True
     return False
 
-def create_purchase_order(session: Session):
-    user = get_logged_in_user()
+def create_purchase_order(session: Session, user: User) -> str:
     portfolio_id = _console.input("Portfolio ID: ")
     portfolio_id = int(portfolio_id)
     if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
-        return _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+        _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+        return f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID"
     ticker = _console.input("Ticker: ").upper()
     quantity_to_buy = _console.input("Quantity: ")
     quantity_to_buy = int(quantity_to_buy)
 
-    if not check_user_enough_balance(ticker, quantity_to_buy, session):
-        return _console.print("Insufficient balance to make purchase", style="bold red")
+    if not check_user_enough_balance(ticker, quantity_to_buy, session, user):
+        _console.print("Insufficient balance to make purchase", style="bold red")
+        return "Insufficient balance to make purchase"
     
     # This checks whether the pair of portfolio_id and ticker combination exist in database already
     exists = session.query(Investment).filter_by(portfolio_id = portfolio_id, ticker = ticker).first()
@@ -50,12 +50,13 @@ def create_purchase_order(session: Session):
     update_user_balance(session, user.username, new_balance)
     return f"Created new purchase order for {quantity_to_buy} shares of {ticker} in portfolio {portfolio_id}"
 
-def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantity: int) -> bool:
-    if ticker in portfolio.holdings and portfolio.holdings[ticker] >= quantity:
+def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantity: int, session: Session) -> bool:
+    investment = session.query(Investment).filter_by(portfolio_id = portfolio.id, ticker = ticker).first()
+    if investment and investment.quantity >= quantity:
         return True
     return False
 
-def harvest_investment(session: Session):
+def harvest_investment(session: Session, user: User):
     portfolio_id = _console.input("Portfolio ID: ")
     portfolio_id = int(portfolio_id)
     if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
@@ -76,7 +77,7 @@ def harvest_investment(session: Session):
         return
     quantity_to_sell = _console.input("Quantity: ")
     quantity_to_sell = int(quantity_to_sell)
-    user = get_logged_in_user()
+ 
 
     if number_of_shares < quantity_to_sell:
         _console.print("Insufficient quantity to make sale", style="bold red")
@@ -110,26 +111,24 @@ def harvest_investment(session: Session):
 #         table.add_row(str(order.id), str(order.portfolio_id), order.ticker, str(order.quantity))
 #     return _console.print(table)
 
-def get_all_investments() -> List[Investment]:
-    try:
-        session = get_session()
-        investments = session.query(Investment).all()
-        return investments
-    finally:
-        session.close()
+# def get_all_investments(session: Session) -> List[Investment]:
+#     try:
+#         investments = session.query(Investment).all()
+#         return investments
+#     finally:
+#         session.close()
 
-def print_all_investments() -> None:
-    try:
-        session = get_session()
-        investments = session.query(Investment).all()
-        table = Table(title = "Investments")
-        table.add_column("Investment ID", style = "bold cyan")
-        table.add_column("Portfolio ID", style = "bold cyan")
-        table.add_column("Ticker", style = "bold cyan")
-        table.add_column("Quantity", style = "bold cyan")
-        for investment in investments:
-            table.add_row(str(investment.id), str(investment.portfolio_id), investment.ticker, str(investment.quantity))
-        _console.print(table)
-    finally:
-        session.close()
+# def print_all_investments(session: Session) -> None:
+#     try:
+#         investments = session.query(Investment).all()
+#         table = Table(title = "Investments")
+#         table.add_column("Investment ID", style = "bold cyan")
+#         table.add_column("Portfolio ID", style = "bold cyan")
+#         table.add_column("Ticker", style = "bold cyan")
+#         table.add_column("Quantity", style = "bold cyan")
+#         for investment in investments:
+#             table.add_row(str(investment.id), str(investment.portfolio_id), investment.ticker, str(investment.quantity))
+#         _console.print(table)
+#     finally:
+#         session.close()
 
