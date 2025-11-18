@@ -52,11 +52,11 @@ def get_all_portfolios(session: Session) -> List[Portfolio]:
 #             value += security.price * quantity
 #     return value
 
-def print_all_portfolios(session: Session):    
+def print_all_portfolios(session: Session) -> None:    
     try:
         portfolios = session.query(Portfolio).filter_by(owner = get_logged_in_user().username).all()
         if len(portfolios) == 0:
-            return _console.print("No portfolios exist.  Add new portfolios", style = "red")    
+            return _console.print("No portfolios exist. Add new portfolios", style = "red")    
         
         table = Table(title = "Portfolios")
         table.add_column("Portfolio ID", style = "orange3")
@@ -97,7 +97,7 @@ def get_all_portfolio_logged_in_user(session: Session) -> List[Portfolio]:
     portfolios = session.query(Portfolio).filter_by(owner = user.username).all()
     return portfolios
 
-# def check_if_portfolio_has_stock(portfolio: Portfolio, ticker: str) -> bool:
-#     if ticker in portfolio.holdings and portfolio.holdings[ticker] > 0:
-#         return True
-#     return False
+
+
+
+

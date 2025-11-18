@@ -7,15 +7,12 @@ import pytest
 from app.domain.User import User
 
 
-# mock db setup here 
-test_engine = create_engine("sqlite:///:memory:", echo=False)
-Base.metadata.create_all(test_engine)
-TestSessionLocal = sessionmaker(bind = test_engine)
-
-
 # this runs before each test function
 @pytest.fixture
 def db_session():
+    engine = create_engine("sqlite:///:memory:", echo=False)
+    Base.metadata.create_all(engine)
+    TestSessionLocal = sessionmaker(bind=engine)
     session = TestSessionLocal()
     yield session
     session.rollback()

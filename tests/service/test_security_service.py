@@ -6,15 +6,12 @@ import pytest
 from app.domain.security import Security
 from app.service.security_service import get_all_securities, print_all_securities, get_price_by_ticker
 
-# mock db setup here 
-test_engine = create_engine("sqlite:///:memory:", echo=False)
-Base.metadata.create_all(test_engine)
-TestSessionLocal = sessionmaker(bind = test_engine)
-
-
 # this runs before each test function
 @pytest.fixture
 def db_session():
+    engine = create_engine("sqlite:///:memory:", echo=False)
+    Base.metadata.create_all(engine)
+    TestSessionLocal = sessionmaker(bind=engine)
     session = TestSessionLocal()
     yield session
     session.rollback()

@@ -16,14 +16,14 @@ class UnsupportedUserOperationError(Exception):
 
 _logged_in_user: User|None = None
 
-def get_logged_in_user():
+def get_logged_in_user() -> User:
     return _logged_in_user
 
-def set_logged_in_user(user: User):
+def set_logged_in_user(user: User) -> None:
     global _logged_in_user
     _logged_in_user = user
 
-def reset_logged_in_user():
+def reset_logged_in_user() -> None:
     global _logged_in_user 
     _logged_in_user = None
 
@@ -53,25 +53,28 @@ def print_all_users(users: List[User]) -> None:
 
 
 def get_user_input() -> dict:
+    try:
+        balance = float(_console.input("Balance: "))
+    except ValueError:
+        raise UnsupportedUserOperationError("Balance must be a number.")
     return {
         "username": _console.input("Username: "),
         "password": _console.input("Password: "),
         "firstname": _console.input("First Name: "),
         "lastname": _console.input("Last Name: "),
-        "balance": float(_console.input("Balance: "))  # catches ValueError here
+        "balance": balance
     }
     
 
-def create_user(session: Session, user_data: dict):
+def create_user(session: Session, user_data: dict) -> str:
     try:
         user = User(**user_data)
         session.add(user)
         session.commit()
         return f"User {user.username} created successfully"
     except IntegrityError:
+        session.rollback()
         raise UnsupportedUserOperationError(f"User with username {user_data["username"]} already exists")
-    except ValueError:
-        raise UnsupportedUserOperationError("Balance must be a number.")
     finally:
         session.close() if session else None
 
@@ -82,9 +85,6 @@ def create_user(session: Session, user_data: dict):
 #         session.commit
 #     finally:
 #         session.close()
-def get_user_username_input() -> str:
-    username = _console.input("Username to delete: ")
-    return username
 
 def get_username_for_deletion() -> str:
     username = _console.input("Username to delete: ")

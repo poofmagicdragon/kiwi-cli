@@ -56,17 +56,18 @@ def portfolio_has_sufficient_quantity(portfolio: Portfolio, ticker: str, quantit
         return True
     return False
 
-def harvest_investment(session: Session, user: User):
+def harvest_investment(session: Session, user: User) -> str:
     portfolio_id = _console.input("Portfolio ID: ")
-    portfolio_id = int(portfolio_id)
-    if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
-        _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
-        return
+    
     try:
         portfolio_id = int(portfolio_id)
     except ValueError:
         _console.print(f"Invalid input: '{portfolio_id}' is not a number")
-        return
+        return f"Invalid input: '{portfolio_id}' is not a number"
+    
+    if portfolio_id not in [p.id for p in get_all_portfolio_logged_in_user(session)]:
+        _console.print(f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID", style="red")
+        return f"Portfolio ID {portfolio_id} does not exist.  Please enter a valid portfolio ID"
     ticker = _console.input("Ticker: ")
 
     number_of_shares = session.query(func.sum(Investment.quantity)).filter_by(portfolio_id = portfolio_id, ticker = ticker).scalar()
@@ -74,14 +75,14 @@ def harvest_investment(session: Session, user: User):
 
     if number_of_shares == 0:
         _console.print(f"Portfolio {portfolio_id} does not have any shares of {ticker}")
-        return
+        return f"Portfolio {portfolio_id} does not have any shares of {ticker}"
     quantity_to_sell = _console.input("Quantity: ")
     quantity_to_sell = int(quantity_to_sell)
  
 
     if number_of_shares < quantity_to_sell:
         _console.print("Insufficient quantity to make sale", style="bold red")
-        return
+        return "Insufficient quantity to make sale"
     sell_price = _console.input("Sale Price: ")
     sell_price = float(sell_price)
 
@@ -95,40 +96,3 @@ def harvest_investment(session: Session, user: User):
     new_balance = user.balance + (sell_price * quantity_to_sell)
     update_user_balance(session, user.username, new_balance)
     return f"Created and executed new sell order for {quantity_to_sell} shares of {ticker} in portfolio {portfolio_id} for ${sell_price}"
-
-# def get_all_purchase_orders() -> List[PurchaseOrder]:
-#     return db.get_all_purchase_orders()
-
-# def print_all_purchase_orders(purchase_orders: List[PurchaseOrder]):    
-#     if not purchase_orders:
-#         return _console.print("No purchase orders found.", style="red")
-#     table = Table(title = "Purchase Orders")
-#     table.add_column("Order ID", style = "bold cyan")
-#     table.add_column("Portfolio ID", style = "bold cyan")
-#     table.add_column("Ticker", style = "bold cyan")
-#     table.add_column("Quantity", style = "bold cyan")
-#     for order in purchase_orders:
-#         table.add_row(str(order.id), str(order.portfolio_id), order.ticker, str(order.quantity))
-#     return _console.print(table)
-
-# def get_all_investments(session: Session) -> List[Investment]:
-#     try:
-#         investments = session.query(Investment).all()
-#         return investments
-#     finally:
-#         session.close()
-
-# def print_all_investments(session: Session) -> None:
-#     try:
-#         investments = session.query(Investment).all()
-#         table = Table(title = "Investments")
-#         table.add_column("Investment ID", style = "bold cyan")
-#         table.add_column("Portfolio ID", style = "bold cyan")
-#         table.add_column("Ticker", style = "bold cyan")
-#         table.add_column("Quantity", style = "bold cyan")
-#         for investment in investments:
-#             table.add_row(str(investment.id), str(investment.portfolio_id), investment.ticker, str(investment.quantity))
-#         _console.print(table)
-#     finally:
-#         session.close()
-

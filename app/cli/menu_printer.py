@@ -68,7 +68,7 @@ def navigate_to_manage_user_menu(logged_in_user: User) -> int:
 # user selection depends on the menu
 _router: Dict[str, MenuFunctions] = {
     "0.1": MenuFunctions(executor = lambda: login(*get_login_inputs(), get_session()), navigator = lambda: constants.MAIN_MENU),
-    "1.1": MenuFunctions(navigator = navigate_to_manage_user_menu),
+    "1.1": MenuFunctions(navigator = lambda: navigate_to_manage_user_menu(get_logged_in_user())),
     "1.2": MenuFunctions(navigator = lambda: constants.MANAGE_PORTFOLIO),
     "2.1": MenuFunctions(executor = lambda: get_all_users(get_session()), printer = print_all_users, navigator = lambda: constants.MANAGE_USERS_MENU),
     "2.2": MenuFunctions(executor = lambda: create_user(get_session(), get_user_input()), printer = lambda x: _console.print(f'\n{x}')), # add user
@@ -84,11 +84,11 @@ _router: Dict[str, MenuFunctions] = {
 }
 
 
-def print_error(error: str):
+def print_error(error: str) -> None:
     _console.print(error, style = "red")
 
 
-def handle_user_selection(menu_id: int, user_selection: int):
+def handle_user_selection(menu_id: int, user_selection: int) -> None:
     if user_selection == 0:
         if menu_id == constants.LOGIN_MENU:
             sys.exit(0) # terminate application
@@ -123,7 +123,7 @@ def handle_user_selection(menu_id: int, user_selection: int):
 
 
 
-def print_menu(menu_id: int):
+def print_menu(menu_id: int) -> None:
     _console.print(_menus[menu_id])
     user_selection = int(_console.input(">>"))
     handle_user_selection(menu_id, user_selection)

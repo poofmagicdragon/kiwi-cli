@@ -16,7 +16,7 @@ def get_all_securities(session: Session) -> List[Security]:
 
 
 
-def print_all_securities(securities: List[Security]):
+def print_all_securities(securities: List[Security]) -> None:
     table = Table(title = "Securities")
     table.add_column("Ticker")
     table.add_column("Issuer")

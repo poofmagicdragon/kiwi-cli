@@ -14,7 +14,3 @@ class Security(Base):
 
     investments: Mapped[List["Investment"]] = relationship("Investment", back_populates="security")
     transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="security")
-    # def __init__(self, ticker: str, issuer: str, price: float):
-    #     self.ticker = ticker
-    #     self.issuer = issuer
-    #     self.price = price

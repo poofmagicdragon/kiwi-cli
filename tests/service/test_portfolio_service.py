@@ -3,10 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base
 import pytest
-from app.domain import Portfolio, User
+from app.domain import Portfolio, User, Investment, Security
 from app.service.portfolio_service import create_portfolio, get_all_portfolio_logged_in_user, get_portfolio_by_name, get_all_portfolios, print_all_portfolios, delete_portfolio
 from app.service.user_service import get_logged_in_user, _logged_in_user
-
+from app.service.portfolio_service import UnsupportedUserOperationError
 # # mock db setup here 
 # test_engine = create_engine("sqlite:///:memory:", echo=False)
 # Base.metadata.create_all(test_engine)
@@ -78,6 +78,15 @@ def test_print_all_portfolios(capsys, db_session):
     assert "description" in output
     assert "long term" in output
 
+
+def test_print_all_portfolios_no_portfolios(db_session, capsys):
+    test_user = User(username="X", firstname="First", lastname="Last", password="Y", balance=100.1)
+    print_all_portfolios(db_session)
+
+    captured = capsys.readouterr()
+    output = captured.out
+    assert output == "No portfolios exist. Add new portfolios\n"
+
 def test_delete_portfolio(db_session):
     test_portfolio = Portfolio(owner="X", name="test", description="sample desc", investment_strategy="sure1")
     db_session.add(test_portfolio)
@@ -87,6 +96,31 @@ def test_delete_portfolio(db_session):
     portfolio = db_session.query(Portfolio).filter_by(name = "test").one_or_none()
 
     assert portfolio is None
+
+def test_delete_portfolio_not_exist(db_session):
+    input = "test"
+
+    portfolio = db_session.query(Portfolio).filter_by(name = "test").one_or_none()
+    with pytest.raises(UnsupportedUserOperationError) as exc_info:
+        delete_portfolio(db_session, input)
+    
+    assert str(exc_info.value) == "Portfolio 'test' does not exist"
+
+def test_delete_portfolio_existing_dependency(db_session):
+    test_user = User(username="X", firstname="First", lastname="Last", password="Y", balance=1000.0)
+    test_portfolio = Portfolio(owner = "X", name = "Test Portfolio", description = "A test portfolio", investment_strategy = "Growth")
+    test_security = Security(ticker ="AAPL", issuer="Apple Inc.", price = 150.0)
+    test_investment = Investment(portfolio_id=1, ticker="AAPL", quantity=10)
+    db_session.add(test_security)
+    db_session.add(test_user)
+    db_session.add(test_portfolio)
+    db_session.add(test_investment)
+    db_session.commit()
+    
+    with pytest.raises(UnsupportedUserOperationError) as exc_info:
+        delete_portfolio(db_session, "Test Portfolio")
+    
+    assert str(exc_info.value) == "Portfolio 'Test Portfolio' has existing dependencies and cannot be deleted"
 
 def test_get_all_portfolio_logged_in_user(monkeypatch, db_session):
     test_user = User(username="X", firstname="First", lastname="Last", password="Y", balance=100.1)
