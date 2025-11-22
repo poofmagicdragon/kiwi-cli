@@ -76,7 +76,7 @@ _router: Dict[str, MenuFunctions] = {
     "1.3": MenuFunctions(navigator = lambda: constants.MARKET_PLACE),
     "4.1": MenuFunctions(executor= lambda: get_all_securities(get_session()), printer = print_all_securities),
     "3.1": MenuFunctions(executor = lambda: get_all_portfolios(get_session()), printer = lambda x: print_all_portfolios(get_session())),
-    "3.2": MenuFunctions(executor = lambda: create_portfolio(get_session()), printer = lambda x: _console.print(f'\n{x}')),
+    "3.2": MenuFunctions(executor = lambda: create_portfolio(get_session(), get_logged_in_user()), printer = lambda x: _console.print(f'\n{x}')),
     "4.2": MenuFunctions(executor=lambda: create_purchase_order(get_session(), get_logged_in_user()), printer=lambda x: _console.print(f'\n{x}')),
     "3.3": MenuFunctions(executor = delete_portfolio, printer = lambda x: _console.print(f'\n{x}')),
     "3.4": MenuFunctions(executor = lambda: harvest_investment(get_session(), get_logged_in_user()), printer = lambda x: _console.print(f'\n{x}'))

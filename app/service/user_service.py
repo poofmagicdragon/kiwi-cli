@@ -108,3 +108,6 @@ def update_user_balance(session: Session, username: str, new_balance: float) -> 
     user.balance = new_balance
     session.commit()
     return f"User {username}'s balance updated successfully to {new_balance}"
+
+
+
